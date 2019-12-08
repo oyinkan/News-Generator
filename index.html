@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>News API</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+    <style>
+        .card {
+            margin: 15px 0;
+        }
+        .card-header {
+            padding: 0;
+        }
+        .card-body {
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+        #search-input {
+            border-right: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .input-group-append {
+            margin-left: -2px;
+        }
+        h1 {
+            padding: 25px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">News Generator</h1>
+        <form>
+            <div class="form-input">
+                <div class="row">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="input-group mb-3">
+                            <input id="search-input" type="text" class="form-control" placeholder="Serch by keyword">
+                            <div class="input-group-append">
+                                <button id="btn-generate" class="btn btn-primary">Generate News</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+        </form><br>
+        <div id="results"></div>
+        <div id="news-wrapper"></div>
+    </div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        // const newsWrapper = document.getElementById('news-wrapper');
+        const generateButton = document.getElementById('btn-generate');
+        let searchInput = document.getElementById('search-input');
+        const result = document.getElementById('results');
+
+        let apiRequest = new XMLHttpRequest();
+        generateButton.addEventListener('click', ($event) => {
+            $event.preventDefault();
+            const chosenKeyword = searchInput.value;
+            apiRequest.open('GET', 'https://newsapi.org/v2/everything?q=' +chosenKeyword+ '&apiKey=ddea06ee6fae4697a64c2e03e067f0d5');
+            apiRequest.send();
+        });
+        
+        
+        apiRequest.onreadystatechange = () => {
+            if (apiRequest.readyState === 4) {
+                const response = JSON.parse(apiRequest.response);
+                const chosenKeyword = searchInput.value;
+                result.innerHTML = 'There are <strong>' +response.totalResults+ '</strong> articles on ' +chosenKeyword+ '.';
+                let output = '<div class="row">';
+                for (let i=0; i<3; i++) {
+                    output+='<div class="col-md-6 col-lg-4">';
+                    output+='<div class="card">';
+                    output+='<div class="card-header"><img class="img-fluid" src="'+ response.articles[i].urlToImage +'"></div>';
+                    output+='<div class="card-body">';
+                    output+='<h4 class="card-title">' + response.articles[i].title + '</h4>';
+                    output+='<p class="card-text">' +response.articles[i].content+ '</p>';
+                    output+='<a class="btn btn-primary" href="'+ response.articles[i].url+'">Full Story</a></div>';
+                    output+='</div>';
+                    output+='</div>';
+                }
+                output+='</div>';
+                $('#news-wrapper').html(output);
+            }
+        }
+    </script>
+</body>
+</html>
